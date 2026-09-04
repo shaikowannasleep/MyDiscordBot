@@ -1,0 +1,51 @@
+import { Client, Colors } from 'discord.js';
+import { DiscordNotifier } from './DiscordNotifier';
+import { DMNotifier } from './DMNotifier';
+import { VoiceNotifier } from './VoiceNotifier';
+import { NotificationType } from '../domain/Alarm';
+
+export interface AlertPayload {
+  userId: string;
+  guildId?: string;
+  channelId?: string;
+  title: string;
+  message: string;
+  notificationType: NotificationType;
+  color?: number;
+}
+
+export class NotificationService {
+  private client: Client;
+
+  constructor(client: Client) {
+    this.client = client;
+  }
+
+  public async dispatchAlert(payload: AlertPayload): Promise<void> {
+    const { userId, guildId, channelId, title, message, notificationType } = payload;
+    const color = payload.color || Colors.Gold;
+
+    // 1. Channel Notification
+    if ((notificationType === 'channel' || notificationType === 'all') && channelId) {
+      await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, title, message, color);
+    }
+
+    // 2. Direct Message Notification
+    if (notificationType === 'dm' || notificationType === 'all') {
+      const dmSent = await DMNotifier.sendDMAlert(this.client, userId, title, message, color);
+      // Fallback: If DM was requested but user has DMs disabled, try channel if available
+      if (!dmSent && channelId && notificationType === 'dm') {
+        await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, title, message, color);
+      }
+    }
+
+    // 3. Voice Notification
+    if ((notificationType === 'voice' || notificationType === 'all') && guildId) {
+      await VoiceNotifier.playVoiceAlert(guildId);
+      // If voice-only, also send a quiet fallback text in channel if available
+      if (notificationType === 'voice' && channelId) {
+        await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, `🔊 ${title}`, message, color);
+      }
+    }
+  }
+}

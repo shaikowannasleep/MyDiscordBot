@@ -1,0 +1,13 @@
+services:
+  discord-game-alarm:
+    build: .
+    container_name: discord-game-alarm
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/app/data/alarm_bot.sqlite
+      - DEFAULT_TIMEZONE=Asia/Ho_Chi_Minh
