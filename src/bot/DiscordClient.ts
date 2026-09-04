@@ -118,9 +118,9 @@ export class DiscordBotClient {
         let commandText = '';
 
         if (isDM) {
-          // In DM: can type without prefix e.g. "alarm", "set 20m", "help"
-          commandText = content.startsWith('!') ? content.substring(1).trim() : content;
-        } else if (content.startsWith('!')) {
+          // In DM: can type with or without prefix (!, . or plain text)
+          commandText = (content.startsWith('!') || content.startsWith('.')) ? content.substring(1).trim() : content;
+        } else if (content.startsWith('!') || content.startsWith('.')) {
           commandText = content.substring(1).trim();
         } else if (content.startsWith(botMention)) {
           commandText = content.replace(botMention, '').trim();
