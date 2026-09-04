@@ -38,7 +38,7 @@ export class DMBuzzerManager {
     this.stopBuzzing(userId);
 
     const maxRepeats = options?.maxRepeats ?? 20; // 20 times x 20s = ~6.6 minutes
-    const intervalMs = options?.intervalMs ?? 20000; // 20 seconds between alerts
+    const intervalMs = options?.intervalMs ?? 5000; // 20 seconds between alerts
 
     try {
       const user = await client.users.fetch(userId).catch(() => null);
