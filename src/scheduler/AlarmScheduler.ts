@@ -77,5 +77,29 @@ export class AlarmScheduler {
       notificationType: alarm.notificationType,
       color
     });
+
+    // 2. Thông báo hỏi đểu sau 2 phút đối với boss timer hoặc alarm chứa text "săn boss"
+    const alarmText = `${alarm.title}`.toLowerCase();
+    const isBossAlarm = alarm.type === 'boss' || alarmText.includes('săn boss') || alarmText.includes('san boss');
+
+    if (isBossAlarm) {
+      setTimeout(async () => {
+        try {
+          const trollMsg = '😏 M đã đi săn boss chưa đấy cu? anh tau là anh đình dũng đẹp trai nói vô sau còn đúng cái nịt thôi, cầm vương thu nhi vào khạc mau còn kịp !!';
+          await this.notificationService.dispatchAlert({
+            userId: alarm.userId,
+            guildId: alarm.guildId,
+            channelId: alarm.channelId,
+            title: `😏 LỜI NHẮC TỪ ANH ĐÌNH DŨNG ĐẸP TRAI: ${alarm.title}`,
+            message: trollMsg,
+            notificationType: alarm.notificationType,
+            color: Colors.DarkOrange,
+            singleAlert: true
+          });
+        } catch (err) {
+          console.error('[AlarmScheduler] Error sending follow-up troll reminder:', err);
+        }
+      }, 2 * 60 * 1000);
+    }
   }
 }

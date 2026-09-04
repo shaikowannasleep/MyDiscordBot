@@ -8,7 +8,8 @@ export class DiscordNotifier {
     title: string,
     description: string,
     color: number = Colors.Gold,
-    mentionTag?: string
+    mentionTag?: string,
+    isSingleAlert: boolean = false
   ): Promise<boolean> {
     try {
       const channel = await client.channels.fetch(channelId);
@@ -21,6 +22,15 @@ export class DiscordNotifier {
         .setTimestamp();
 
       const baseMention = mentionTag ? mentionTag : `@everyone`;
+
+      // Nếu là singleAlert (như thông báo hỏi đểu sau 2 phút), chỉ gửi đúng 1 lần
+      if (isSingleAlert) {
+        await (channel as TextChannel).send({
+          content: `🔔 ${baseMention}\n${description}`,
+          embeds: [embed]
+        });
+        return true;
+      }
 
       // Gửi 3 lần tin nhắn riêng biệt (cách nhau 1s) để Discord reo chuông / popup 3 lần liên tiếp
       // Lần 1

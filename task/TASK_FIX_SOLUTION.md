@@ -55,4 +55,16 @@ Tài liệu đặc tả các giải pháp kỹ thuật, biện pháp khắc ph�
 - **Trạng thái**: Đã hướng dẫn chi tiết các phương án.
 
 ---
+
+### [SOL-006] Cơ chế thông báo "Hỏi đểu sau 2 phút" cho sự kiện Săn Boss
+- **Vấn đề**: Người dùng muốn có một thông báo phụ sau 2 phút kể từ lần báo đầu tiên (chỉ phát 1 lần duy nhất) đối với các sự kiện/hẹn giờ có chứa text `"săn boss"`:
+  > "😏 M đã đi săn boss chưa đấy cu? anh tau là anh đình dũng đẹp trai nói vô sau còn đúng cái nịt thôi, cầm vương thu nhi vào khạc mau còn kịp !!"
+- **Giải pháp kỹ thuật**:
+  - Tại `EventScheduler.ts` và `AlarmScheduler.ts`, sau khi kích hoạt alert ban đầu, hệ thống kiểm tra `name`/`title`/`customMessage` xem có chứa `săn boss` hoặc `san boss` (không phân biệt hoa thường).
+  - Nếu khớp, lên lịch một timer 2 phút (`setTimeout(..., 120_000)`).
+  - Thêm cờ `singleAlert: true` trong `AlertPayload` và `DiscordNotifier.ts` để thông báo hỏi đểu này chỉ phát đúng 1 lần (không lặp lại chuỗi 3 ping dồn dập như alert ban đầu).
+- **Trạng thái**: Đã triển khai và hoạt động tốt trên cả Recurring Events và Boss Timers.
+
+---
 *(Sẽ tiếp tục cập nhật các giải pháp kỹ thuật trong quá trình thực thi)*
+
