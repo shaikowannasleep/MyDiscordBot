@@ -32,5 +32,11 @@ Nhật ký ghi nhận toàn bộ các lỗi, cảnh báo kỹ thuật, rủi ro 
 - **Nguyên nhân gốc rễ**: Kiểu dữ liệu `weekday` của Luxon là union type nghiêm ngặt `1 | 2 | 3 | 4 | 5 | 6 | 7` (`WeekdayNumbers`), không chấp nhận kiểu `number` thuần túy.
 - **Tham chiếu giải pháp**: Xem chi tiết xử lý tại `TASK_FIX_SOLUTION.md` mục SOL-004.
 
+### ERR-005: Git Push HTTP 403 (Windows Credential Manager Conflict)
+- **Thời điểm**: 04/09/2026
+- **Mô tả**: Khi thực hiện `git push origin main`, GitHub trả về lỗi: `remote: Permission to shaikowannasleep/MyDiscordBot.git denied to namHorus123. fatal: unable to access ... 403`.
+- **Nguyên nhân gốc rễ**: Windows Credential Manager đang lưu token/credential đăng nhập mặc định của tài khoản `namHorus123` thay vì `shaikowannasleep`.
+- **Tham chiếu giải pháp**: Xem chi tiết xử lý tại `TASK_FIX_SOLUTION.md` mục SOL-005.
+
 ---
 *(Sẽ tiếp tục bổ sung các lỗi thực tế trong quá trình implement)*

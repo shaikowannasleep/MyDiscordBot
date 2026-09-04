@@ -40,5 +40,19 @@ Tài liệu đặc tả các giải pháp kỹ thuật, biện pháp khắc ph�
   - Typecast `dayOfWeek as WeekdayNumbers` trong hàm `getNextWeeklyTrigger` để thỏa mãn strict typing của TypeScript.
 - **Trạng thái**: Đã giải quyết.
 
+### SOL-005: Khắc phục xung đột quyền Git Credential Manager
+- **Mã lỗi liên quan**: ERR-005
+- **Phương án xử lý**:
+  - Máy tính Windows đang lưu session xác thực của `namHorus123`. Để push lên repository của `shaikowannasleep`:
+    - **Cách 1 (Sử dụng GitHub Personal Access Token - PAT)**:
+      Chạy lệnh gán trực tiếp URL kèm tài khoản:
+      `git remote set-url origin https://shaikowannasleep:<PAT_TOKEN>@github.com/shaikowannasleep/MyDiscordBot.git`
+      Sau đó thực hiện `git push origin main` và `git push origin tasks-internal`.
+    - **Cách 2 (Thêm collaborator trên GitHub)**:
+      Vào repository `MyDiscordBot` trên GitHub > Settings > Collaborators > Invite `namHorus123`. Khi đó token hiện có trên máy sẽ push được ngay lập tức.
+    - **Cách 3 (Xóa cache credential Windows)**:
+      Vào Windows Credential Manager > Windows Credentials > Tìm mục `git:https://github.com` và Remove, sau đó khi chạy `git push` trình duyệt sẽ bật lên đăng nhập tài khoản `shaikowannasleep`.
+- **Trạng thái**: Đã hướng dẫn chi tiết các phương án.
+
 ---
 *(Sẽ tiếp tục cập nhật các giải pháp kỹ thuật trong quá trình thực thi)*
