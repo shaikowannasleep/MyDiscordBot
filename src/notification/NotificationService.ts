@@ -1,6 +1,7 @@
 import { Client, Colors } from 'discord.js';
 import { DiscordNotifier } from './DiscordNotifier';
 import { DMNotifier } from './DMNotifier';
+import { DMBuzzerManager } from './DMBuzzerManager';
 import { VoiceNotifier } from './VoiceNotifier';
 import { NotificationType } from '../domain/Alarm';
 
@@ -33,9 +34,15 @@ export class NotificationService {
     }
 
     // 2. Direct Message Notification
-    // Luôn gửi kèm DM cho chủ nhân hẹn giờ để điện thoại chắc chắn reo chuông / nổ popup (kể cả khi tắt chuông server)
+    // Bắn DM cho user cho đến khi user bấm ĐÃ ĐỌC hoặc nhắn tin thì mới thôi
     if (notificationType === 'dm' || notificationType === 'all' || (notificationType === 'channel' && userId)) {
-      const dmSent = await DMNotifier.sendDMAlert(this.client, userId, title, message, color);
+      let dmSent = false;
+      if (singleAlert) {
+        dmSent = await DMNotifier.sendDMAlert(this.client, userId, title, message, color);
+      } else {
+        dmSent = await DMBuzzerManager.startBuzzing(this.client, userId, title, message, color);
+      }
+
       // Fallback: If DM was requested but user has DMs disabled, try channel if available
       if (!dmSent && channelId && notificationType === 'dm') {
         await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, title, message, color, mentionTag, singleAlert);

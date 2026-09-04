@@ -17,6 +17,7 @@ import { AlarmRepository } from '../database/repositories/AlarmRepository';
 import { EventRepository } from '../database/repositories/EventRepository';
 import { VoiceSessionRepository } from '../database/repositories/VoiceSessionRepository';
 import { VoiceManager } from '../voice/VoiceManager';
+import { DMBuzzerManager } from '../notification/DMBuzzerManager';
 
 export class InteractionRouter {
   public static async handleButton(interaction: ButtonInteraction): Promise<void> {
@@ -243,6 +244,18 @@ export class InteractionRouter {
     if (customId === 'btn:cancel_action') {
       await interaction.update({
         content: 'Đã hủy thao tác.',
+        embeds: [],
+        components: []
+      });
+      return;
+    }
+
+    // Acknowledge & Stop DM Buzzer
+    if (customId.startsWith('btn:ack_buzzer:')) {
+      const targetUserId = customId.replace('btn:ack_buzzer:', '');
+      DMBuzzerManager.stopBuzzing(targetUserId);
+      await interaction.update({
+        content: `🔕 **ĐÃ TẮT CHUÔNG BÁO!**\nĐã xác nhận bạn đã đọc thông báo. Chúc bạn chơi game vui vẻ!`,
         embeds: [],
         components: []
       });
