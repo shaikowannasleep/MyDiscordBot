@@ -280,11 +280,14 @@ export class InteractionRouter {
   public static async handleModal(interaction: ModalSubmitInteraction): Promise<void> {
     const customId = interaction.customId;
 
-    if (customId === 'modal:event_create') {
+    if (customId.startsWith('modal:event_create')) {
+      const channelIdFromCustomId = customId.split(':')[2];
+      const targetChannelId = channelIdFromCustomId || interaction.channelId;
+
       const name = interaction.fields.getTextInputValue('event_name').trim();
       const timeStr = interaction.fields.getTextInputValue('event_time').trim();
       const repeatStr = interaction.fields.getTextInputValue('event_repeat').trim().toLowerCase();
-      const notifyStr = (interaction.fields.getTextInputValue('event_notify') || 'DM').trim().toLowerCase();
+      const notifyStr = (interaction.fields.getTextInputValue('event_notify') || 'Channel').trim().toLowerCase();
       const customMsgRaw = interaction.fields.getTextInputValue('event_custom_msg')?.trim() || '';
 
       const parsedTime = TimeParser.parseTimeOfDay(timeStr);
@@ -293,11 +296,11 @@ export class InteractionRouter {
         return;
       }
 
-      const isDaily = repeatStr === 'daily' || repeatStr === 'hang ngay';
+      const isDaily = repeatStr.includes('daily') || repeatStr.includes('ngay');
       const dayOfWeek = isDaily ? undefined : TimeParser.parseDayOfWeek(repeatStr);
 
       if (!isDaily && !dayOfWeek) {
-        await interaction.reply({ content: '❌ Chu kỳ lặp không hợp lệ (Nhập "Daily" hoặc thứ trong tuần: Mon..Sun, Thứ 2..CN).', ephemeral: true });
+        await interaction.reply({ content: '❌ Chu kỳ lặp không hợp lệ (Nhập "Thứ 2" .. "Chủ Nhật" hoặc "Hàng ngày").', ephemeral: true });
         return;
       }
 
@@ -322,7 +325,7 @@ export class InteractionRouter {
       const event = EventRepository.create({
         userId: interaction.user.id,
         guildId: interaction.guildId || undefined,
-        channelId: interaction.channelId || undefined,
+        channelId: targetChannelId || undefined,
         name,
         time: timeStr,
         repeatType: isDaily ? 'daily' : 'weekly',
@@ -334,22 +337,26 @@ export class InteractionRouter {
         nextTriggerAt
       });
 
-      const repeatLabel = isDaily ? 'Every day' : `Every ${TimeParser.getDayName(dayOfWeek!)}`;
+      const repeatLabel = isDaily ? 'Hàng ngày' : `Mỗi ${TimeParser.getDayNameVi(dayOfWeek!)}`;
+      const nextUnix = Math.floor(nextTriggerAt / 1000);
+
       const embed = new EmbedBuilder()
-        .setTitle('✅ Event created')
+        .setTitle('✅ Event Created')
         .setColor(Colors.Purple)
         .addFields(
-          { name: '⚔️ Tên sự kiện', value: name, inline: true },
+          { name: '⚔️ Sự kiện', value: name, inline: true },
           { name: '📆 Chu kỳ', value: repeatLabel, inline: true },
-          { name: '⏰ Thời gian', value: timeStr, inline: true },
-          { name: '🔔 Thông báo kênh', value: notificationType.toUpperCase(), inline: true }
+          { name: '⏰ Giờ diễn ra', value: `${timeStr} (<t:${nextUnix}:T>)`, inline: true },
+          { name: '⏳ Lần diễn ra kế tiếp', value: `**<t:${nextUnix}:R>** (<t:${nextUnix}:F>)`, inline: false },
+          { name: '📢 Kênh nhận tin', value: targetChannelId ? `<#${targetChannelId}>` : 'Tin nhắn riêng (DM)', inline: true },
+          { name: '🔔 Phương thức', value: notificationType.toUpperCase(), inline: true }
         );
 
       if (cleanMsg) {
-        embed.addFields({ name: '📢 Lời nhắn & Tag', value: cleanMsg, inline: false });
+        embed.addFields({ name: '💬 Lời nhắn & Tag ping', value: cleanMsg, inline: false });
       }
 
-      embed.setFooter({ text: `Event ID: #E${event.id} · Các thành viên có thể bấm nút bên dưới để nhận tin riêng!` })
+      embed.setFooter({ text: `Event ID: #E${event.id} · Bấm nút dưới để tự động nhận thông báo riêng!` })
         .setTimestamp();
 
       const subRow = new ActionRowBuilder<ButtonBuilder>().addComponents(

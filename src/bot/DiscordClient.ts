@@ -181,7 +181,8 @@ export class DiscordBotClient {
             enabled: true
           });
 
-          await message.reply(`✅ Đã tạo hẹn giờ **${title}** trong **${parsed.formatted}** (ID: #${alarm.id}). Khi hết giờ bot sẽ nhắc bạn!`);
+          const unixSec = Math.floor(alarm.triggerAt / 1000);
+          await message.reply(`✅ Đã tạo hẹn giờ **${title}**: đếm ngược **<t:${unixSec}:R>** (lúc <t:${unixSec}:T>) (ID: #${alarm.id})!`);
           return;
         }
 
@@ -206,7 +207,8 @@ export class DiscordBotClient {
             enabled: true
           });
 
-          await message.reply(`🐉 Đã bắt đầu đếm ngược săn **${bossName}**: **${parsed.formatted}** (ID: #${alarm.id})!`);
+          const unixSec = Math.floor(alarm.triggerAt / 1000);
+          await message.reply(`🐉 Đã bắt đầu đếm ngược săn **${bossName}**: hồi sinh lúc <t:${unixSec}:T> (⏳ **<t:${unixSec}:R>**) (ID: #${alarm.id})!`);
           return;
         }
 

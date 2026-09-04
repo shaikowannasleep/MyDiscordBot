@@ -18,40 +18,49 @@ export const data = new SlashCommandBuilder()
   .setDescription('Game Events Assistant')
   .addSubcommand(sub =>
     sub.setName('dashboard')
-      .setDescription('View active game events')
+      .setDescription('View active game events and manage subscriptions')
   )
   .addSubcommand(sub =>
     sub.setName('create')
       .setDescription('Create a new recurring game event')
+      .addChannelOption(opt =>
+        opt.setName('channel')
+          .setDescription('Kênh văn bản muốn nhận thông báo (tùy chọn)')
+          .setRequired(false)
+      )
   );
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
   const subcommand = interaction.options.getSubcommand(false) || 'dashboard';
 
   if (subcommand === 'create') {
+    const targetChannel = interaction.options.getChannel('channel');
+    const channelId = targetChannel?.id || interaction.channelId;
+
     const modal = new ModalBuilder()
-      .setCustomId('modal:event_create')
+      .setCustomId(`modal:event_create:${channelId}`)
       .setTitle('CREATE GAME EVENT');
 
     const nameInput = new TextInputBuilder()
       .setCustomId('event_name')
       .setLabel('Tên sự kiện (Event Name)')
-      .setPlaceholder('Ví dụ: Thành Chiến, World Boss')
+      .setPlaceholder('Ví dụ: Săn Boss Độ Ách, Thành Chiến')
       .setStyle(TextInputStyle.Short)
       .setRequired(true);
 
     const timeInput = new TextInputBuilder()
       .setCustomId('event_time')
-      .setLabel('Giờ diễn ra (HH:mm - Asia/Ho_Chi_Minh)')
-      .setPlaceholder('Ví dụ: 19:04, 20:00')
+      .setLabel('Giờ diễn ra (HH:mm - 24h)')
+      .setPlaceholder('Ví dụ: 08:59, 19:04, 20:00')
       .setStyle(TextInputStyle.Short)
       .setRequired(true);
 
     const repeatInput = new TextInputBuilder()
       .setCustomId('event_repeat')
-      .setLabel('Chu kỳ lặp (Daily hoặc Thứ trong tuần)')
-      .setPlaceholder('Daily, Mon, Tue, Wed, Thu, Fri, Sat, Sun')
+      .setLabel('Chu kỳ lặp (Thứ 2 - CN hoặc Hàng ngày)')
+      .setPlaceholder('Thứ 2, Thứ 6, Thứ 7, Chủ Nhật, Hàng ngày...')
       .setStyle(TextInputStyle.Short)
+      .setValue('Thứ Sáu')
       .setRequired(true);
 
     const notifyInput = new TextInputBuilder()

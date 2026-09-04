@@ -48,16 +48,17 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     enabled: true
   });
 
-  const targetDt = DateUtils.now().plus({ milliseconds: parsed.totalMilliseconds });
+  const unixSeconds = Math.floor(triggerAt / 1000);
 
   const embed = new EmbedBuilder()
     .setTitle('🐉 BOSS TIMER')
     .setDescription(`**${bossName}**`)
     .setColor(Colors.Orange)
     .addFields(
-      { name: '⏰ Giờ hồi sinh (Spawn)', value: targetDt.toFormat('HH:mm:ss'), inline: true },
-      { name: '⏳ Còn lại (Remaining)', value: parsed.formatted, inline: true },
-      { name: '🔔 Thông báo qua', value: activeSession ? 'Channel + Voice' : 'Discord channel', inline: false }
+      { name: '⏰ Giờ hồi sinh (Spawn)', value: `<t:${unixSeconds}:T> (<t:${unixSeconds}:d>)`, inline: true },
+      { name: '⏳ Đếm ngược trực tiếp', value: `**<t:${unixSeconds}:R>**`, inline: true },
+      { name: '⌛ Thời lượng', value: parsed.formatted, inline: true },
+      { name: '🔔 Kênh nhận thông báo', value: interaction.channelId ? `<#${interaction.channelId}>` : 'Tin nhắn riêng (DM)', inline: false }
     )
     .setFooter({ text: `Boss Timer ID: #${alarm.id}` })
     .setTimestamp();
