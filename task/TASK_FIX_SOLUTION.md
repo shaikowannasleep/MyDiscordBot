@@ -66,5 +66,22 @@ Tài liệu đặc tả các giải pháp kỹ thuật, biện pháp khắc ph�
 - **Trạng thái**: Đã triển khai và hoạt động tốt trên cả Recurring Events và Boss Timers.
 
 ---
+
+### [SOL-007] Hỗ trợ định dạng thời gian phức hợp (`9p30s`, `1d23h5p3s`) và lệnh gõ tắt trực tiếp
+- **Vấn đề**: Người dùng muốn nhập thời gian dạng ghép đa đơn vị như `9p30s` (9 phút 30 giây) hoặc `1d23h5p3s` (1 ngày 23 tiếng 5 phút 3 giây), hỗ trợ cả tiếng Việt (`1 ngày 2 tiếng 30 phút`).
+- **Giải pháp kỹ thuật**:
+  - Viết lại `TimeParser.parseDuration`:
+    - Chuẩn hóa text loại bỏ dấu tiếng Việt (`normalize('NFD')`).
+    - Quét các cặp token `(\d+)\s*([a-zA-Z]+)`.
+    - Hỗ trợ đầy đủ bộ đơn vị:
+      - Ngày: `d`, `day`, `days`, `ngay`, `ng` (86400s).
+      - Giờ: `h`, `hr`, `hrs`, `hour`, `hours`, `gio`, `tieng`, `g` (3600s).
+      - Phút: `m`, `min`, `mins`, `minute`, `minutes`, `p`, `ph`, `phut` (60s).
+      - Giây: `s`, `sec`, `secs`, `second`, `seconds`, `giay` (1s).
+    - Tạo thuộc tính `formattedVi` hiển thị tiếng Việt tự nhiên (VD: `1 ngày 23 tiếng 5 phút 3 giây`).
+  - Trong `DiscordClient.ts`: Hỗ trợ gõ tắt trực tiếp `.9p30s [tên]` hoặc `!1d23h5p3s [tên]` mà không cần gõ chữ `set`.
+- **Trạng thái**: Đã hoàn thành, 7/7 unit tests passed 100%.
+
+---
 *(Sẽ tiếp tục cập nhật các giải pháp kỹ thuật trong quá trình thực thi)*
 

@@ -22,7 +22,7 @@
 
 ### Phase 2 — Database & Xử lý thời gian (Timezone & Persistence)
 - [x] Xây dựng Database schema (`users`, `alarms`, `events`, `voice_sessions`).
-- [x] Hiện thực `TimeParser.ts` (xử lý `20s`, `20m`, `1h`, `2h30m`).
+- [x] Hiện thực `TimeParser.ts` (xử lý linh hoạt `20s`, `20m`, `1h`, `2h30m`, ghép đa đơn vị `9p30s`, `1d23h5p3s`, tiếng Việt `1 ngày 2 tiếng 30 phút` và lệnh gõ tắt).
 - [x] Hiện thực `DateUtils.ts` (múi giờ mặc định `Asia/Ho_Chi_Minh`, xử lý `09:00` hôm nay/ngày mai).
 - [x] Hiện thực Database repository lưu trữ persistent.
 
