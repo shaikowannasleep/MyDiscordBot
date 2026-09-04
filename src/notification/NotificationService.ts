@@ -33,11 +33,12 @@ export class NotificationService {
     }
 
     // 2. Direct Message Notification
-    if (notificationType === 'dm' || notificationType === 'all') {
+    // Luôn gửi kèm DM cho chủ nhân hẹn giờ để điện thoại chắc chắn reo chuông / nổ popup (kể cả khi tắt chuông server)
+    if (notificationType === 'dm' || notificationType === 'all' || (notificationType === 'channel' && userId)) {
       const dmSent = await DMNotifier.sendDMAlert(this.client, userId, title, message, color);
       // Fallback: If DM was requested but user has DMs disabled, try channel if available
       if (!dmSent && channelId && notificationType === 'dm') {
-        await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, title, message, color);
+        await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, title, message, color, mentionTag, singleAlert);
       }
     }
 

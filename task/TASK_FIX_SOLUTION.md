@@ -83,5 +83,18 @@ Tài liệu đặc tả các giải pháp kỹ thuật, biện pháp khắc ph�
 - **Trạng thái**: Đã hoàn thành, 7/7 unit tests passed 100%.
 
 ---
+
+### [SOL-008] Khắc phục tình trạng không nhận được Push Notification trên điện thoại
+- **Nguyên nhân cốt lõi**:
+  1. **Tính năng "Push Notification Inactive Timeout" mặc định của Discord (10 phút)**: Khi Discord đang mở trên máy tính (kể cả thu nhỏ hoặc chạy nền), Discord mặc định coi user đang online PC và chặn toàn bộ thông báo đẩy (push banner/âm thanh) tới điện thoại cho đến khi user rời PC 10 phút.
+  2. **Server tắt chuông hoặc chặn `@everyone`**: Hầu hết user trên mobile đều bật "Suppress @everyone and @here" hoặc Mute server để tránh bị làm phiền. Khi bot chỉ tag `@everyone` mà không tag `<@userId>`, điện thoại sẽ không bao giờ nổ thông báo.
+  3. **Không gửi kèm DM**: Khi hẹn giờ ở kênh (`channel`), bot trước đây không gửi DM, làm lỡ thông báo nếu user không mở Discord.
+- **Giải pháp kỹ thuật đã xử lý**:
+  - Tại `DiscordNotifier.ts`: Luôn chèn direct user mention `<@${userId}>` vào chuỗi tag `baseMention` (ví dụ: `<@123456> @everyone`), kích hoạt mức ưu tiên cao nhất của Discord trên điện thoại.
+  - Tại `NotificationService.ts`: Bổ sung cơ chế gửi song song 1 bản tin nhắn riêng (DM) trực tiếp từ bot về tài khoản của user (kể cả khi đặt báo thức ở server), đảm bảo điện thoại rung chuông / hiện popup ngay lập tức.
+  - Hướng dẫn cấu hình người dùng: Giảm Inactive Timeout trên PC từ 10m xuống 1m và kiểm tra quyền thông báo trên điện thoại.
+- **Trạng thái**: Đã cập nhật code, build và kiểm chứng thành công.
+
+---
 *(Sẽ tiếp tục cập nhật các giải pháp kỹ thuật trong quá trình thực thi)*
 

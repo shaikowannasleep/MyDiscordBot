@@ -21,7 +21,10 @@ export class DiscordNotifier {
         .setColor(color)
         .setTimestamp();
 
-      const baseMention = mentionTag ? mentionTag : `@everyone`;
+      // Tag trực tiếp user (<@userId>) kèm server tag để Discord điện thoại phát chuông & hiện popup notification
+      const userMention = userId ? `<@${userId}>` : '';
+      const serverMention = mentionTag ? mentionTag : `@everyone`;
+      const baseMention = userMention ? `${userMention} ${serverMention}` : serverMention;
 
       // Nếu là singleAlert (như thông báo hỏi đểu sau 2 phút), chỉ gửi đúng 1 lần
       if (isSingleAlert) {
