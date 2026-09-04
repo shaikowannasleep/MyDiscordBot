@@ -78,16 +78,34 @@ export class EventScheduler {
       ? `Mỗi ${TimeParser.getDayName(event.dayOfWeek || 1)}`
       : 'Hàng ngày';
 
-    const message = `⚔️ **${event.name}**\nSự kiện bắt đầu lúc **${event.time}** (${repeatLabel}).`;
+    const customText = event.customMessage ? `\n\n📢 **Thông báo:** ${event.customMessage}` : '';
+    const mentionTag = event.mentionTag ? `${event.mentionTag} ` : '';
 
+    const message = `⚔️ **${event.name}**\nSự kiện bắt đầu lúc **${event.time}** (${repeatLabel}).${customText}`;
+
+    // 1. Dispatch primary alert (Channel / Creator DM)
     await this.notificationService.dispatchAlert({
       userId: event.userId,
       guildId: event.guildId,
       channelId: event.channelId,
-      title: `⚔️ GAME EVENT: ${event.name}`,
+      title: `${mentionTag}⚔️ GAME EVENT: ${event.name}`.trim(),
       message,
       notificationType: event.notificationType as any,
       color: Colors.Purple
     });
+
+    // 2. Dispatch DM to all subscribed users
+    const subscribers = EventRepository.getSubscribers(event.id);
+    for (const subUserId of subscribers) {
+      if (subUserId !== event.userId) {
+        await this.notificationService.dispatchAlert({
+          userId: subUserId,
+          title: `⚔️ NHẮC HẸN RIÊNG: ${event.name}`,
+          message: `🔔 Bạn đã đăng ký nhận thông báo sự kiện **${event.name}**!\n⏰ Giờ diễn ra: **${event.time}** (${repeatLabel}).${customText}`,
+          notificationType: 'dm',
+          color: Colors.Purple
+        });
+      }
+    }
   }
 }

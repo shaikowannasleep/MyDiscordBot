@@ -9,8 +9,9 @@ export class EventRepository {
     const stmt = db.prepare(`
       INSERT INTO events (
         user_id, guild_id, channel_id, name, time, repeat_type,
-        day_of_week, notification_type, enabled, next_trigger_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        day_of_week, notification_type, custom_message, mention_tag,
+        enabled, next_trigger_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = stmt.run(
@@ -22,6 +23,8 @@ export class EventRepository {
       event.repeatType,
       event.dayOfWeek || null,
       event.notificationType,
+      event.customMessage || null,
+      event.mentionTag || null,
       event.enabled ? 1 : 0,
       event.nextTriggerAt,
       now,
@@ -80,6 +83,48 @@ export class EventRepository {
     return result.changes > 0;
   }
 
+  public static subscribeUser(eventId: number, userId: string): boolean {
+    const db = Database.getInstance();
+    try {
+      const stmt = db.prepare(`
+        INSERT INTO event_subscribers (event_id, user_id, created_at)
+        VALUES (?, ?, ?)
+      `);
+      stmt.run(eventId, userId, Date.now());
+      return true;
+    } catch {
+      return false; // Already subscribed
+    }
+  }
+
+  public static unsubscribeUser(eventId: number, userId: string): boolean {
+    const db = Database.getInstance();
+    const stmt = db.prepare(`
+      DELETE FROM event_subscribers 
+      WHERE event_id = ? AND user_id = ?
+    `);
+    const result = stmt.run(eventId, userId);
+    return result.changes > 0;
+  }
+
+  public static isUserSubscribed(eventId: number, userId: string): boolean {
+    const db = Database.getInstance();
+    const row = db.prepare(`
+      SELECT 1 FROM event_subscribers 
+      WHERE event_id = ? AND user_id = ?
+    `).get(eventId, userId);
+    return Boolean(row);
+  }
+
+  public static getSubscribers(eventId: number): string[] {
+    const db = Database.getInstance();
+    const rows = db.prepare(`
+      SELECT user_id FROM event_subscribers 
+      WHERE event_id = ?
+    `).all(eventId) as any[];
+    return rows.map(r => r.user_id);
+  }
+
   private static mapRow(row: any): GameEvent {
     return {
       id: row.id,
@@ -91,6 +136,8 @@ export class EventRepository {
       repeatType: row.repeat_type,
       dayOfWeek: row.day_of_week || undefined,
       notificationType: row.notification_type,
+      customMessage: row.custom_message || undefined,
+      mentionTag: row.mention_tag || undefined,
       enabled: row.enabled === 1,
       nextTriggerAt: row.next_trigger_at,
       createdAt: row.created_at,
