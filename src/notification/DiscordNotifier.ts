@@ -7,7 +7,8 @@ export class DiscordNotifier {
     userId: string,
     title: string,
     description: string,
-    color: number = Colors.Gold
+    color: number = Colors.Gold,
+    mentionTag?: string
   ): Promise<boolean> {
     try {
       const channel = await client.channels.fetch(channelId);
@@ -19,8 +20,12 @@ export class DiscordNotifier {
         .setColor(color)
         .setTimestamp();
 
+      const baseMention = mentionTag ? mentionTag : `<@${userId}>`;
+      // Tag 3 lần ping theo yêu cầu để người chơi không bị lỡ giờ
+      const triplePing = `${baseMention} ${baseMention} ${baseMention}`;
+
       await (channel as TextChannel).send({
-        content: `🔔 <@${userId}>`,
+        content: `🚨 **ĐÃ ĐẾN GIỜ!**\n🔔 ${triplePing}`,
         embeds: [embed]
       });
 

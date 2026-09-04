@@ -11,6 +11,7 @@ export interface AlertPayload {
   title: string;
   message: string;
   notificationType: NotificationType;
+  mentionTag?: string;
   color?: number;
 }
 
@@ -22,12 +23,12 @@ export class NotificationService {
   }
 
   public async dispatchAlert(payload: AlertPayload): Promise<void> {
-    const { userId, guildId, channelId, title, message, notificationType } = payload;
+    const { userId, guildId, channelId, title, message, notificationType, mentionTag } = payload;
     const color = payload.color || Colors.Gold;
 
     // 1. Channel Notification
     if ((notificationType === 'channel' || notificationType === 'all') && channelId) {
-      await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, title, message, color);
+      await DiscordNotifier.sendChannelAlert(this.client, channelId, userId, title, message, color, mentionTag);
     }
 
     // 2. Direct Message Notification

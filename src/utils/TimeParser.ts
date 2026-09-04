@@ -56,19 +56,32 @@ export class TimeParser {
 
   /**
    * Normalizes day of week string to 1-7 (1 = Monday, 7 = Sunday)
+   * Supports both English and Vietnamese (Thứ 2..Chủ Nhật, T2..CN)
    */
   public static parseDayOfWeek(input: string): number | null {
     if (!input || typeof input !== 'string') return null;
 
-    const normalized = input.trim().toLowerCase();
+    const normalized = input
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, ''); // remove diacritics for flexible matching
+
     const days: Record<string, number> = {
-      monday: 1, mon: 1,
-      tuesday: 2, tue: 2,
-      wednesday: 3, wed: 3,
-      thursday: 4, thu: 4,
-      friday: 5, fri: 5,
-      saturday: 6, sat: 6,
-      sunday: 7, sun: 7
+      // Monday
+      monday: 1, mon: 1, 'thu 2': 1, 'thu hai': 1, t2: 1,
+      // Tuesday
+      tuesday: 2, tue: 2, 'thu 3': 2, 'thu ba': 2, t3: 2,
+      // Wednesday
+      wednesday: 3, wed: 3, 'thu 4': 3, 'thu tu': 3, t4: 3,
+      // Thursday
+      thursday: 4, thu: 4, 'thu 5': 4, 'thu nam': 4, t5: 4,
+      // Friday
+      friday: 5, fri: 5, 'thu 6': 5, 'thu sau': 5, t6: 5,
+      // Saturday
+      saturday: 6, sat: 6, 'thu 7': 6, 'thu bay': 6, t7: 6,
+      // Sunday
+      sunday: 7, sun: 7, 'chu nhat': 7, cn: 7
     };
 
     return days[normalized] || null;
@@ -77,5 +90,10 @@ export class TimeParser {
   public static getDayName(dayOfWeek: number): string {
     const names = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     return names[dayOfWeek] || 'Unknown';
+  }
+
+  public static getDayNameVi(dayOfWeek: number): string {
+    const names = ['', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+    return names[dayOfWeek] || 'Không rõ';
   }
 }
