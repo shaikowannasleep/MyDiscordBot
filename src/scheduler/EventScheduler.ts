@@ -107,5 +107,30 @@ export class EventScheduler {
         });
       }
     }
+
+    // 3. Thông báo hỏi đểu sau 2 phút đối với sự kiện chứa text "săn boss"
+    const eventText = `${event.name} ${event.customMessage || ''}`.toLowerCase();
+    const isBossHunt = eventText.includes('săn boss') || eventText.includes('san boss');
+
+    if (isBossHunt) {
+      setTimeout(async () => {
+        try {
+          const trollMsg = '😏 M đã đi săn boss chưa đấy cu? anh tau là anh đình dũng đẹp trai nói vô sau còn đúng cái nịt thôi, cầm vương thu nhi vào khạc mau còn kịp !!';
+          await this.notificationService.dispatchAlert({
+            userId: event.userId,
+            guildId: event.guildId,
+            channelId: event.channelId,
+            title: `😏 LỜI NHẮC TỪ ANH ĐÌNH DŨNG ĐẸP TRAI: ${event.name}`,
+            message: trollMsg,
+            notificationType: event.notificationType as any,
+            mentionTag: event.mentionTag,
+            color: Colors.DarkOrange,
+            singleAlert: true
+          });
+        } catch (err) {
+          console.error('[EventScheduler] Error sending follow-up troll reminder:', err);
+        }
+      }, 2 * 60 * 1000);
+    }
   }
 }
