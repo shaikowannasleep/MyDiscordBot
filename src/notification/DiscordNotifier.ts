@@ -20,12 +20,26 @@ export class DiscordNotifier {
         .setColor(color)
         .setTimestamp();
 
-      const baseMention = mentionTag ? mentionTag : `<@${userId}>`;
-      // Tag 3 lần ping theo yêu cầu để người chơi không bị lỡ giờ
-      const triplePing = `${baseMention} ${baseMention} ${baseMention}`;
+      const baseMention = mentionTag ? mentionTag : `@everyone`;
 
+      // Gửi 3 lần tin nhắn riêng biệt (cách nhau 1s) để Discord reo chuông / popup 3 lần liên tiếp
+      // Lần 1
       await (channel as TextChannel).send({
-        content: `🚨 **ĐÃ ĐẾN GIỜ!**\n🔔 ${triplePing}`,
+        content: `🚨 **[THÔNG BÁO 1/3]** 🔔 ${baseMention} ĐÃ ĐẾN GIỜ: **${title}**!`
+      });
+
+      await new Promise((res) => setTimeout(res, 1000));
+
+      // Lần 2
+      await (channel as TextChannel).send({
+        content: `🚨 **[THÔNG BÁO 2/3]** 🔔 ${baseMention} TẬP HỢP ANH EM: **${title}**!`
+      });
+
+      await new Promise((res) => setTimeout(res, 1000));
+
+      // Lần 3 kèm Embed chi tiết
+      await (channel as TextChannel).send({
+        content: `🚨 **[THÔNG BÁO 3/3]** 🔔 ${baseMention} VÀO GAME NGAY: **${title}**!`,
         embeds: [embed]
       });
 
