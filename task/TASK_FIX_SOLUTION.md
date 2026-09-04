@@ -96,5 +96,26 @@ Tài liệu đặc tả các giải pháp kỹ thuật, biện pháp khắc ph�
 - **Trạng thái**: Đã cập nhật code, build và kiểm chứng thành công.
 
 ---
-*(Sẽ tiếp tục cập nhật các giải pháp kỹ thuật trong quá trình thực thi)*
+
+### [SOL-009] Bắn thông báo liên tục vào DM cho đến khi User ĐÃ ĐỌC hoặc NHẮN TIN thì mới dừng (DMBuzzerManager)
+- **Vấn đề**: Người dùng yêu cầu cơ chế chuông báo thức gắt gao: Khi đến giờ hẹn giờ / săn boss, bot phải liên tục "bắn" thông báo vào Direct Message (DM) của user theo chu kỳ cho đến khi user đọc hoặc nhắn tin phản hồi thì bot mới chịu dừng.
+- **Hạn chế kỹ thuật Discord Gateway**:
+  - Discord Bot API không có quyền truy cập sự kiện "Read Receipt" (người dùng mở xem tin nhắn) vì chính sách bảo mật của Discord.
+- **Giải pháp kỹ thuật chuẩn xác**:
+  1. **Tạo `DMBuzzerManager.ts`**:
+     - Quản lý phiên báo thức liên tục (`BuzzerSession`) theo từng `userId`.
+     - Ngay khi kích hoạt báo thức, gửi tin nhắn DM kèm nút bấm tương tác:
+       `[🔕 ĐÃ ĐỌC / TẮT CHUÔNG]` (Custom ID: `btn:ack_buzzer:${userId}`).
+     - Thiết lập vòng lặp nhắc nhở định kỳ (`intervalMs: 20_000` = 20 giây một lần), kèm số thứ tự nhắc nhở `[Nhắc lần X/20]` để user không thể bỏ lỡ.
+     - Có ngưỡng an toàn `maxRepeats: 20` (~6.6 phút) để tránh spam vô hạn nếu user ngủ quên hoặc mất kết nối, tuân thủ nghiêm ngặt Rate Limit của Discord.
+  2. **Cơ chế xác nhận & Tắt chuông**:
+     - **Cách 1 (Click nút)**: Trong `InteractionRouter.ts`, bắt event `btn:ack_buzzer:`, hủy timer interval ngay lập tức và update message sang trạng thái đã tắt chuông.
+     - **Cách 2 (Nhắn tin bất kỳ trong DM)**: Trong `DiscordClient.ts` sự kiện `MessageCreate`, nếu tin nhắn đến từ DM và user đang có chuông reo, bot lập tức ngắt buzzer và phản hồi xác nhận `🔕 ĐÃ TẮT CHUÔNG BÁO!`. Người dùng có thể nhắn bất kỳ từ nào (ví dụ: `ok`, `dậy rồi`, `đã đọc`, `nghe rồi`...) hoặc gõ lệnh tiếp theo (`.9p30s`, `!set 10m`).
+     - **Cách 3 (Lệnh tắt khẩn cấp)**: Bổ sung các lệnh `!stop`, `!off`, `!tat`, `!snooze` cho phép tắt chuông nhanh ở bất kỳ đâu.
+  3. **Tích hợp `NotificationService.ts`**:
+     - Khi dispatch alert vào DM (trừ các tin nhắn `singleAlert` như troll reminder), tự động kích hoạt `DMBuzzerManager.startBuzzing`.
+- **Trạng thái**: Đã hiện thực hoàn chỉnh, 9/9 unit tests passed 100%, bot runtime hoạt động ổn định.
+
+---
+
 

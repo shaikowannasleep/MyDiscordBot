@@ -19,6 +19,7 @@ import { TimeParser } from '../utils/TimeParser';
 import { AlarmRepository } from '../database/repositories/AlarmRepository';
 import { VoiceManager } from '../voice/VoiceManager';
 import { Alarm } from '../domain/Alarm';
+import { DMBuzzerManager } from '../notification/DMBuzzerManager';
 
 export class DiscordBotClient {
   private client: Client;
@@ -118,6 +119,20 @@ export class DiscordBotClient {
         let commandText = '';
 
         if (isDM) {
+          // Nếu user đang có chuông báo thức liên tục reo trong DM, bất kỳ tin nhắn nào của họ gửi đến đều xác nhận ĐÃ ĐỌC và tắt chuông!
+          if (DMBuzzerManager.hasActiveBuzzer(message.author.id)) {
+            const session = DMBuzzerManager.getActiveSession(message.author.id);
+            const title = session ? session.title : 'báo thức';
+            DMBuzzerManager.stopBuzzing(message.author.id);
+
+            const isCommand = content.startsWith('!') || content.startsWith('.');
+            await message.reply(`🔕 **ĐÃ TẮT CHUÔNG BÁO!**\nBot đã nhận được tin nhắn của bạn và xác nhận bạn đã đọc thông báo cho **${title}**. Chúc bạn chơi game vui vẻ!`).catch(() => {});
+
+            if (!isCommand) {
+              return; // Người dùng chỉ nhắn tin phản hồi để tắt chuông (vd: "ok", "dậy rồi", "đã đọc")
+            }
+          }
+
           // In DM: can type with or without prefix (!, . or plain text)
           commandText = (content.startsWith('!') || content.startsWith('.')) ? content.substring(1).trim() : content;
         } else if (content.startsWith('!') || content.startsWith('.')) {
@@ -244,6 +259,16 @@ export class DiscordBotClient {
           }
           const listText = alarms.map((a: Alarm) => `• **#${a.id}** [${a.type.toUpperCase()}] ${a.title}`).join('\n');
           await message.reply(`⏰ **Danh sách báo thức của bạn:**\n${listText}`);
+          return;
+        }
+
+        if (command === 'stop' || command === 'off' || command === 'tat' || command === 'snooze') {
+          const stopped = DMBuzzerManager.stopBuzzing(message.author.id);
+          if (stopped) {
+            await message.reply('🔕 **Đã tắt chuông báo thức liên tục!**');
+          } else {
+            await message.reply('ℹ️ Hiện bạn không có chuông báo thức liên tục nào đang rung.');
+          }
           return;
         }
 

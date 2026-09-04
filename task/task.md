@@ -40,6 +40,7 @@
 - [x] Tính năng Event nâng cao: Hỗ trợ lời nhắn tùy chỉnh, tag `@everyone` / `@here` và nút `[🔔 Nhận thông báo DM riêng]` cho từng thành viên.
 - [x] Tính năng Ping dồn dập: Gửi 3 lần tin nhắn ping `@everyone` riêng biệt cách nhau 1s khi đến giờ báo để đảm bảo không ai bị lỡ.
 - [x] Tính năng "Hỏi đểu sau 2 phút": Tự động phát thông báo cà khịa sau đúng 2 phút kể từ lần thông báo đầu tiên cho các sự kiện/hẹn giờ chứa chữ "săn boss" (chỉ gửi 1 lần duy nhất).
+- [x] Tính năng "Báo thức liên tục vào DM" (`DMBuzzerManager`): Tự động bắn DM dồn dập mỗi 20s cho đến khi người dùng bấm nút `[🔕 ĐÃ ĐỌC / TẮT CHUÔNG]` hoặc nhắn tin phản hồi trong DM thì mới dừng.
 - [x] Command `/boss <duration> [name]`: Boss respawn timer kèm giao diện đếm ngược.
 - [x] Command `/list`: Hiển thị danh sách báo thức có phân trang (Pagination) và nút tương tác Delete/Edit.
 - [x] Command `/cancel <id>` & `/cancelall`: Hủy báo thức có popup xác nhận.
