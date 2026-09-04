@@ -5,6 +5,8 @@ import {
   TextInputBuilder,
   TextInputStyle,
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   EmbedBuilder,
   Colors,
   GuildMember
@@ -138,18 +140,47 @@ export class InteractionRouter {
       const notifyInput = new TextInputBuilder()
         .setCustomId('event_notify')
         .setLabel('Phương thức nhận tin (DM / Channel / All)')
-        .setValue('DM')
+        .setValue('Channel')
         .setStyle(TextInputStyle.Short)
+        .setRequired(false);
+
+      const customMsgInput = new TextInputBuilder()
+        .setCustomId('event_custom_msg')
+        .setLabel('Nội dung tin nhắn & Tag (Tùy chọn)')
+        .setPlaceholder('@everyone Săn boss Độ Ách Tai Nha nha ae...')
+        .setStyle(TextInputStyle.Paragraph)
         .setRequired(false);
 
       modal.addComponents(
         new ActionRowBuilder<TextInputBuilder>().addComponents(nameInput),
         new ActionRowBuilder<TextInputBuilder>().addComponents(timeInput),
         new ActionRowBuilder<TextInputBuilder>().addComponents(repeatInput),
-        new ActionRowBuilder<TextInputBuilder>().addComponents(notifyInput)
+        new ActionRowBuilder<TextInputBuilder>().addComponents(notifyInput),
+        new ActionRowBuilder<TextInputBuilder>().addComponents(customMsgInput)
       );
 
       await interaction.showModal(modal);
+      return;
+    }
+
+    // Event Subscription Toggle Button
+    if (customId.startsWith('btn:event:sub:')) {
+      const eventId = parseInt(customId.replace('btn:event:sub:', ''), 10);
+      const isSubbed = EventRepository.isUserSubscribed(eventId, interaction.user.id);
+
+      if (isSubbed) {
+        EventRepository.unsubscribeUser(eventId, interaction.user.id);
+        await interaction.reply({
+          content: '🔕 Bạn đã hủy nhận thông báo DM riêng cho sự kiện này.',
+          ephemeral: true
+        });
+      } else {
+        EventRepository.subscribeUser(eventId, interaction.user.id);
+        await interaction.reply({
+          content: '🔔 Đã đăng ký thành công! Khi sự kiện này diễn ra, bot sẽ tự động gửi tin nhắn riêng (DM) nhắc bạn.',
+          ephemeral: true
+        });
+      }
       return;
     }
 
@@ -254,10 +285,11 @@ export class InteractionRouter {
       const timeStr = interaction.fields.getTextInputValue('event_time').trim();
       const repeatStr = interaction.fields.getTextInputValue('event_repeat').trim().toLowerCase();
       const notifyStr = (interaction.fields.getTextInputValue('event_notify') || 'DM').trim().toLowerCase();
+      const customMsgRaw = interaction.fields.getTextInputValue('event_custom_msg')?.trim() || '';
 
       const parsedTime = TimeParser.parseTimeOfDay(timeStr);
       if (!parsedTime) {
-        await interaction.reply({ content: '❌ Giờ sự kiện không hợp lệ (định dạng HH:mm).', ephemeral: true });
+        await interaction.reply({ content: '❌ Giờ sự kiện không hợp lệ (định dạng HH:mm, ví dụ 08:59 hoặc 19:04).', ephemeral: true });
         return;
       }
 
@@ -265,7 +297,7 @@ export class InteractionRouter {
       const dayOfWeek = isDaily ? undefined : TimeParser.parseDayOfWeek(repeatStr);
 
       if (!isDaily && !dayOfWeek) {
-        await interaction.reply({ content: '❌ Chu kỳ lặp không hợp lệ (Nhập "Daily" hoặc thứ trong tuần: Mon..Sun).', ephemeral: true });
+        await interaction.reply({ content: '❌ Chu kỳ lặp không hợp lệ (Nhập "Daily" hoặc thứ trong tuần: Mon..Sun, Thứ 2..CN).', ephemeral: true });
         return;
       }
 
@@ -276,7 +308,16 @@ export class InteractionRouter {
         nextTriggerAt = DateUtils.getNextWeeklyTrigger(dayOfWeek!, parsedTime.hour, parsedTime.minute).toMillis();
       }
 
-      const notificationType = (['channel', 'dm', 'voice', 'all'].includes(notifyStr) ? notifyStr : 'dm') as any;
+      const notificationType = (['channel', 'dm', 'voice', 'all'].includes(notifyStr) ? notifyStr : 'channel') as any;
+
+      // Extract mention tag if included in customMsgRaw
+      let mentionTag: string | undefined;
+      let cleanMsg = customMsgRaw;
+      if (customMsgRaw.includes('@everyone')) {
+        mentionTag = '@everyone';
+      } else if (customMsgRaw.includes('@here')) {
+        mentionTag = '@here';
+      }
 
       const event = EventRepository.create({
         userId: interaction.user.id,
@@ -287,6 +328,8 @@ export class InteractionRouter {
         repeatType: isDaily ? 'daily' : 'weekly',
         dayOfWeek: dayOfWeek || undefined,
         notificationType,
+        customMessage: cleanMsg || undefined,
+        mentionTag,
         enabled: true,
         nextTriggerAt
       });
@@ -299,12 +342,24 @@ export class InteractionRouter {
           { name: '⚔️ Tên sự kiện', value: name, inline: true },
           { name: '📆 Chu kỳ', value: repeatLabel, inline: true },
           { name: '⏰ Thời gian', value: timeStr, inline: true },
-          { name: '🔔 Phương thức', value: notificationType.toUpperCase(), inline: true }
-        )
-        .setFooter({ text: `Event ID: #E${event.id}` })
+          { name: '🔔 Thông báo kênh', value: notificationType.toUpperCase(), inline: true }
+        );
+
+      if (cleanMsg) {
+        embed.addFields({ name: '📢 Lời nhắn & Tag', value: cleanMsg, inline: false });
+      }
+
+      embed.setFooter({ text: `Event ID: #E${event.id} · Các thành viên có thể bấm nút bên dưới để nhận tin riêng!` })
         .setTimestamp();
 
-      await interaction.reply({ embeds: [embed] });
+      const subRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`btn:event:sub:${event.id}`)
+          .setLabel('🔔 Nhận thông báo DM riêng')
+          .setStyle(ButtonStyle.Success)
+      );
+
+      await interaction.reply({ embeds: [embed], components: [subRow] });
       return;
     }
 

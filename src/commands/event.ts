@@ -59,14 +59,22 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       .setLabel('Phương thức nhận tin (DM / Channel / All)')
       .setPlaceholder('DM, Channel hoặc All')
       .setStyle(TextInputStyle.Short)
-      .setValue('DM')
+      .setValue('Channel')
+      .setRequired(false);
+
+    const customMsgInput = new TextInputBuilder()
+      .setCustomId('event_custom_msg')
+      .setLabel('Nội dung tin nhắn & Tag (Tùy chọn)')
+      .setPlaceholder('@everyone Săn boss Độ Ách Tai Nha nha ae...')
+      .setStyle(TextInputStyle.Paragraph)
       .setRequired(false);
 
     modal.addComponents(
       new ActionRowBuilder<TextInputBuilder>().addComponents(nameInput),
       new ActionRowBuilder<TextInputBuilder>().addComponents(timeInput),
       new ActionRowBuilder<TextInputBuilder>().addComponents(repeatInput),
-      new ActionRowBuilder<TextInputBuilder>().addComponents(notifyInput)
+      new ActionRowBuilder<TextInputBuilder>().addComponents(notifyInput),
+      new ActionRowBuilder<TextInputBuilder>().addComponents(customMsgInput)
     );
 
     await interaction.showModal(modal);

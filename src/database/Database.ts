@@ -56,10 +56,20 @@ export class Database {
         repeat_type TEXT NOT NULL,
         day_of_week INTEGER,
         notification_type TEXT DEFAULT 'dm',
+        custom_message TEXT,
+        mention_tag TEXT,
         enabled INTEGER DEFAULT 1,
         next_trigger_at INTEGER NOT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS event_subscribers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        user_id TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        UNIQUE(event_id, user_id)
       );
 
       CREATE TABLE IF NOT EXISTS voice_sessions (
@@ -72,5 +82,13 @@ export class Database {
         active INTEGER DEFAULT 1
       );
     `);
+
+    // Migration for existing databases
+    try {
+      db.exec(`ALTER TABLE events ADD COLUMN custom_message TEXT;`);
+    } catch {}
+    try {
+      db.exec(`ALTER TABLE events ADD COLUMN mention_tag TEXT;`);
+    } catch {}
   }
 }
