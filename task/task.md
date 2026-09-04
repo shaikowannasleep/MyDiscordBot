@@ -37,6 +37,7 @@
 - [x] Command `/set <duration>`: Đặt timer nhanh với embed và format chuẩn.
 - [x] Command `/sethour <time>`: Đặt alarm theo giờ cụ thể.
 - [x] Command `/event` & `/event create`: Modal tạo sự kiện lặp lại (Daily, Weekly) kèm chọn phương thức thông báo (DM / Discord).
+- [x] Tính năng Event nâng cao: Hỗ trợ lời nhắn tùy chỉnh, tag `@everyone` / `@here` và nút `[🔔 Nhận thông báo DM riêng]` cho từng thành viên.
 - [x] Command `/boss <duration> [name]`: Boss respawn timer kèm giao diện đếm ngược.
 - [x] Command `/list`: Hiển thị danh sách báo thức có phân trang (Pagination) và nút tương tác Delete/Edit.
 - [x] Command `/cancel <id>` & `/cancelall`: Hủy báo thức có popup xác nhận.
