@@ -20,6 +20,23 @@ test('TimeParser - parses quick duration strings correctly', () => {
   assert.strictEqual(t2h30m?.totalSeconds, 9000);
   assert.strictEqual(t2h30m?.formatted, '2 hours 30 minutes');
 
+  // Test 9p30s (9 minutes 30 seconds)
+  const t9p30s = TimeParser.parseDuration('9p30s');
+  assert.strictEqual(t9p30s?.totalSeconds, 570);
+  assert.strictEqual(t9p30s?.formatted, '9 minutes 30 seconds');
+  assert.strictEqual(t9p30s?.formattedVi, '9 phút 30 giây');
+
+  // Test 1d23h5p3s (1 day 23 hours 5 minutes 3 seconds)
+  const tComplex = TimeParser.parseDuration('1d23h5p3s');
+  assert.strictEqual(tComplex?.totalSeconds, 86400 + 23 * 3600 + 5 * 60 + 3);
+  assert.strictEqual(tComplex?.formatted, '1 day 23 hours 5 minutes 3 seconds');
+  assert.strictEqual(tComplex?.formattedVi, '1 ngày 23 tiếng 5 phút 3 giây');
+
+  // Test Vietnamese phrases
+  const tVi = TimeParser.parseDuration('1 ngày 2 tiếng 30 phút');
+  assert.strictEqual(tVi?.totalSeconds, 86400 + 7200 + 1800);
+  assert.strictEqual(tVi?.formattedVi, '1 ngày 2 tiếng 30 phút');
+
   assert.strictEqual(TimeParser.parseDuration('invalid'), null);
   assert.strictEqual(TimeParser.parseDuration(''), null);
 });

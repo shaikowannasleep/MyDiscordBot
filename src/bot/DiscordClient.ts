@@ -212,6 +212,30 @@ export class DiscordBotClient {
           return;
         }
 
+        // Shorthand command: Cho phép gõ trực tiếp .9p30s [tên] hoặc .1d23h5p3s [tên]
+        const directDuration = TimeParser.parseDuration(command);
+        if (directDuration) {
+          const title = args.slice(1).join(' ') || 'Quick Timer';
+          const titleLower = title.toLowerCase();
+          const isBoss = titleLower.includes('săn boss') || titleLower.includes('san boss') || titleLower.includes('boss');
+          const alarm = AlarmRepository.create({
+            userId: message.author.id,
+            guildId: message.guild?.id,
+            channelId: message.channel.id,
+            type: isBoss ? 'boss' : 'quick',
+            title,
+            triggerAt: Date.now() + directDuration.totalMilliseconds,
+            notificationType: isDM ? 'dm' : 'channel',
+            enabled: true
+          });
+
+          const unixSec = Math.floor(alarm.triggerAt / 1000);
+          const icon = isBoss ? '🐉' : '⏰';
+          const labelTime = directDuration.formattedVi || directDuration.formatted;
+          await message.reply(`${icon} Đã tạo hẹn giờ **${title}**: đếm ngược **${labelTime}** (<t:${unixSec}:R> lúc <t:${unixSec}:T>) (ID: #${alarm.id})!`);
+          return;
+        }
+
         if (command === 'list') {
           const alarms = AlarmRepository.findActiveByUserId(message.author.id);
           if (alarms.length === 0) {
