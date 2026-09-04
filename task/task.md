@@ -38,6 +38,7 @@
 - [x] Command `/sethour <time>`: Đặt alarm theo giờ cụ thể.
 - [x] Command `/event` & `/event create`: Modal tạo sự kiện lặp lại (Daily, Weekly) kèm chọn phương thức thông báo (DM / Discord).
 - [x] Tính năng Event nâng cao: Hỗ trợ lời nhắn tùy chỉnh, tag `@everyone` / `@here` và nút `[🔔 Nhận thông báo DM riêng]` cho từng thành viên.
+- [x] Tính năng Ping dồn dập: Gửi 3 lần tin nhắn ping `@everyone` riêng biệt cách nhau 1s khi đến giờ báo để đảm bảo không ai bị lỡ.
 - [x] Command `/boss <duration> [name]`: Boss respawn timer kèm giao diện đếm ngược.
 - [x] Command `/list`: Hiển thị danh sách báo thức có phân trang (Pagination) và nút tương tác Delete/Edit.
 - [x] Command `/cancel <id>` & `/cancelall`: Hủy báo thức có popup xác nhận.
