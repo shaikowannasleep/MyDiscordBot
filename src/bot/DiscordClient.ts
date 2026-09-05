@@ -46,17 +46,6 @@ export class DiscordBotClient {
     this.client.once(Events.ClientReady, async (readyClient) => {
       console.log(`🤖 [DiscordBotClient] Logged in as ${readyClient.user.tag}`);
 
-      // Initialize database
-      Database.getInstance();
-
-      // Initialize notification & scheduler services
-      const notificationService = new NotificationService(this.client);
-      this.alarmScheduler = new AlarmScheduler(notificationService);
-      this.eventScheduler = new EventScheduler(notificationService);
-
-      this.alarmScheduler.start();
-      this.eventScheduler.start();
-
       // Register slash commands: Global and instantly for all joined guilds
       const token = process.env.DISCORD_TOKEN;
       const clientId = process.env.CLIENT_ID || readyClient.user.id;
@@ -289,10 +278,21 @@ export class DiscordBotClient {
   }
 
   public async start(token?: string): Promise<void> {
+    // Initialize persistent database
+    Database.getInstance();
+
+    // Initialize notification & scheduler services
+    const notificationService = new NotificationService(this.client);
+    this.alarmScheduler = new AlarmScheduler(notificationService);
+    this.eventScheduler = new EventScheduler(notificationService);
+
+    this.alarmScheduler.start();
+    this.eventScheduler.start();
+
     const botToken = token || process.env.DISCORD_TOKEN;
     if (!botToken) {
       console.warn('⚠️ [DiscordBotClient] DISCORD_TOKEN is not set in environment or .env file.');
-      console.log('ℹ️ Bot engine and services initialized in offline/test mode.');
+      console.log('ℹ️ Discord bot initialized in offline mode.');
       return;
     }
     await this.client.login(botToken);

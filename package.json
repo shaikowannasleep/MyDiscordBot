@@ -24,6 +24,7 @@
     "@discordjs/voice": "^0.19.2",
     "discord.js": "^14.27.0",
     "dotenv": "^16.4.7",
+    "grammy": "^1.46.0",
     "luxon": "^3.5.0"
   },
   "devDependencies": {
