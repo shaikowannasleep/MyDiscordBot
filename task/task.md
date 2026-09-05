@@ -51,8 +51,14 @@
 - [x] `VoiceManager.ts`: Quản lý kết nối voice và phát âm báo/TTS.
 
 ### Phase 6 — Testing, Docker, CI & Chiến lược Git
-- [x] Viết unit tests cho TimeParser và Scheduler (7/7 tests passed).
+- [x] Viết unit tests cho TimeParser và Scheduler (10/10 tests passed).
 - [x] Kiểm tra TypeScript compile (`npm run build` passed 100%).
 - [x] Tạo `Dockerfile` và `docker-compose.yml`.
 - [x] Tạo GitHub Actions workflow (`.github/workflows/ci.yml`).
-- [/] Thiết lập branch bảo mật tài liệu (`tasks-internal`) và commit lên `main`.
+- [x] Thiết lập branch bảo mật tài liệu (`tasks-internal`) và commit lên `main`.
+
+### Phase 7 — Telegram Bot & 24/7 Hosting Engine
+- [x] Tích hợp `TelegramBotClient.ts` qua framework `grammy`: Hỗ trợ `/start`, `/set`, `/boss`, `.9p30s`, `/list`, `/stop`.
+- [x] Xây dựng Persistent Buzzer trên Telegram với nút bấm Inline `[🔕 ĐÃ ĐỌC / TẮT CHUÔNG]`, lặp lại chuông reo dồn dập mỗi 20s.
+- [x] Tích hợp `KeepAliveServer.ts`: HTTP Server endpoint `/health` trên cổng 3000 phục vụ uptime keepalive 24/7 trên Render/Koyeb.
+- [x] Tính năng Dual-platform Notification Mirror: Tự động mirror báo thức sang Telegram khi có `TELEGRAM_CHAT_ID`.

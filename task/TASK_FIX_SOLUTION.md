@@ -118,4 +118,24 @@ Tài liệu đặc tả các giải pháp kỹ thuật, biện pháp khắc ph�
 
 ---
 
+### [SOL-010] Giải pháp Online 24/7 không bao giờ ngủ & Mở rộng sang Telegram Bot (Loud Mobile Push)
+- **Vấn đề cốt lõi của người dùng**:
+  1. Khi chạy bot trên các dịch vụ web miễn phí (như Render Web Service), sau 15 phút không có request HTTP, dịch vụ tự động "sleep" (ngủ đông) làm bot Discord bị offline.
+  2. Khi chạy local trên máy tính, khi tắt máy hoặc server restart, bot bị dừng.
+  3. Người dùng cần một phương án tốt hơn: hoặc làm **Telegram Bot** hoặc cách nào tối ưu nhất để bot luôn online 24/7 và điện thoại luôn nhận được chuông báo thức chắc chắn 100%.
+- **Giải pháp kỹ thuật toàn diện**:
+  1. **Tích hợp Telegram Bot (`TelegramBotClient.ts` sử dụng `grammy`)**:
+     - Telegram có ưu thế vượt trội về Mobile Push Notifications: Không bao giờ bị chặn/giảm âm lượng như Discord, không có 10-phút desktop timeout, reo chuông và rung máy lập tức.
+     - Hỗ trợ đầy đủ các lệnh giống Discord: `/set 20m`, `/boss 30m [tên]`, `.9p30s`, `/list`, `/stop`.
+     - Tích hợp **Persistent Buzzer trên Telegram**: Gửi tin kèm Inline Keyboard `[🔕 ĐÃ ĐỌC / TẮT CHUÔNG]`, reo chuông dồn dập mỗi 20s cho đến khi bấm nút hoặc nhắn tin phản hồi.
+     - **Tính năng Mirror thông báo**: Khi cấu hình `TELEGRAM_CHAT_ID`, bất kỳ hẹn giờ nào tạo từ Discord cũng được bắn song song về Telegram trên điện thoại để đảm bảo không bao giờ bị miss!
+  2. **Tích hợp `KeepAliveServer.ts` (HTTP Health Check Server)**:
+     - Khởi chạy một server HTTP siêu nhẹ trên cổng `PORT` (mặc định 3000) với endpoint `/health`.
+     - Cho phép kết hợp với các dịch vụ uptime miễn phí (như UptimeRobot hoặc Cron-Job.org) ping định kỳ 5 phút/lần để giữ cho container Render/Koyeb luôn thức 24/7/365 mà không bao giờ bị ngủ đông.
+  3. **Kiến trúc thống nhất đa nền tảng**:
+     - Cả Discord Bot và Telegram Bot cùng dùng chung Database, cùng dùng chung bộ tính toán thời gian `TimeParser` và hệ thống Schedulers.
+- **Trạng thái**: Đã hiện thực, 10/10 unit tests passed 100%, bot chạy ổn định.
+
+---
+
 
